@@ -4,11 +4,9 @@ function Square({ value, onSquareClick }) {
   return <button onClick={onSquareClick} className="square">{ value }</button>;
 }
 
-export default function Board() {
-  const [isXTurn, setIsXTurn] = useState(true);
-  const [squares, setSquares] = useState(Array(9).fill(null));
-
+function Board({isXTurn, squares, onPlay, onReset}) {
   function handleClick(i) {
+    // Updates game board
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
@@ -16,13 +14,7 @@ export default function Board() {
     const nextSquares = squares.slice();
     nextSquares[i] = isXTurn ? 'X' : 'O';
 
-    setSquares(nextSquares);
-    setIsXTurn(!isXTurn);
-  }
-
-  function resetBoard() {
-    setSquares(Array(9).fill(null));
-    setIsXTurn(true);
+    onPlay(nextSquares);
   }
 
   const winner = calculateWinner(squares);
@@ -47,9 +39,10 @@ export default function Board() {
           <Square onSquareClick={() => handleClick(8)} value={squares[8]}/>
         </div>
       </div>
+
       <div className="status-area">
         <div className="status">{ status }</div>
-        <button onClick={resetBoard} className="reset">Reset Board</button>
+        <button onClick={onReset} className="reset">Reset Board</button>
       </div>
     </>
   );
@@ -79,4 +72,30 @@ export default function Board() {
 
     return winner;
   }
+}
+
+export default function Game() {
+  const [isXTurn, setIsXTurn] = useState(true);
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const currentSquares = history[history.length - 1];
+
+  function handlePlay(nextSquares) {
+    setHistory([...history, nextSquares]);
+    setIsXTurn(!isXTurn);
+  }
+
+  function resetBoard() {
+    setHistory([Array(9).fill(null)]);
+    setIsXTurn(true);
+  }
+
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board isXTurn={isXTurn} squares={currentSquares} onPlay={handlePlay} onReset={resetBoard} />
+      </div>
+      <div className="game-info">
+      </div>
+    </div>
+  );
 }
