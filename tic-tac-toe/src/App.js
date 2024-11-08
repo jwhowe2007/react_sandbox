@@ -4,10 +4,10 @@ function Square({ value, onSquareClick }) {
   return <button onClick={onSquareClick} className="square">{ value }</button>;
 }
 
-function Board({isXTurn, squares, gameState, wonGame, onPlay, onReset}) {
+function Board({isXTurn, squares, gameState, gameWon, onPlay, onReset}) {
   function handleClick(i) {
     // Updates game board
-    if (calculateWinner(squares) || squares[i]) {
+    if (gameWon || squares[i]) {
       return;
     }
 
@@ -15,11 +15,6 @@ function Board({isXTurn, squares, gameState, wonGame, onPlay, onReset}) {
     nextSquares[i] = isXTurn ? 'X' : 'O';
 
     onPlay(nextSquares);
-  }
-
-  const winner = calculateWinner(squares);
-  if (winner != null) {
-    wonGame(winner)
   }
 
   return (
@@ -54,28 +49,40 @@ export default function Game() {
   const [isXTurn, setIsXTurn] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [gameState, setGameState] = useState("It's X's turn: ");
+  const [gameWon, setGameWon] = useState(false);
   const currentSquares = history[history.length - 1];
 
   function handlePlay(nextSquares) {
     setHistory([...history, nextSquares]);
-    setIsXTurn(!isXTurn);
-    setGameState(!isXTurn ? "It's X's turn: " : "It's O's turn: ");
-  }
 
-  function handleWin(winner) {
-    setGameState("Winner: Player " + winner + "!!");
+    if (history.length == 9) {
+      setGameState("Game ends in a draw. Please reset the board to start anew!");
+      return;
+    }
+
+    let winner = calculateWinner(nextSquares);
+
+    if (winner != null) {
+      console.log(winner);
+      setGameState("Winner: Player " + winner + "!!");
+      setGameWon(true);
+    } else {
+      setIsXTurn(!isXTurn);
+      setGameState(!isXTurn ? "It's X's turn: " : "It's O's turn: ");
+    }
   }
 
   function resetBoard() {
     setHistory([Array(9).fill(null)]);
     setIsXTurn(true);
     setGameState("It's X's turn: ");
+    setGameWon(false);
   }
 
   return (
     <div className="game">
       <div className="game-board">
-        <Board isXTurn={isXTurn} squares={currentSquares} gameState={gameState} wonGame={handleWin} onPlay={handlePlay} onReset={resetBoard} />
+        <Board isXTurn={isXTurn} squares={currentSquares} gameState={gameState} gameWon={gameWon} onPlay={handlePlay} onReset={resetBoard} />
       </div>
       <div className="game-info"></div>
     </div>
