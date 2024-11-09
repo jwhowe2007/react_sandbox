@@ -5,6 +5,9 @@ function Square({ value, onSquareClick }) {
 }
 
 function Board({isXTurn, squares, gameState, gameWon, onPlay, onReset}) {
+  const rows = 3;
+  const columns = 3;
+
   function handleClick(i) {
     // Updates game board
     if (gameWon || squares[i]) {
@@ -17,24 +20,32 @@ function Board({isXTurn, squares, gameState, gameWon, onPlay, onReset}) {
     onPlay(nextSquares);
   }
 
+  function renderSquare(index) {
+    return (
+      <Square key={index} value={squares[index]} onSquareClick={() => handleClick(index)}/>
+    );
+  }
+
+  function buildSquares() {
+    let rowSet = [];
+
+    for (let i = 0; i < rows; i++) {
+      let rowSquares = [];
+
+      for (let j = 0; j < columns; j++) {
+        rowSquares.push(renderSquare(rows*i + j));
+      }
+
+      rowSet.push(<div key={i} className="board-row">{rowSquares}</div>)
+    }
+
+    return rowSet;
+  }
+
   return (
     <>
       <div className="board">
-        <div className="board-row">
-          <Square onSquareClick={() => handleClick(0)} value={squares[0]}/>
-          <Square onSquareClick={() => handleClick(1)} value={squares[1]}/>
-          <Square onSquareClick={() => handleClick(2)} value={squares[2]}/>
-        </div>
-        <div className="board-row">
-          <Square onSquareClick={() => handleClick(3)} value={squares[3]}/>
-          <Square onSquareClick={() => handleClick(4)} value={squares[4]}/>
-          <Square onSquareClick={() => handleClick(5)} value={squares[5]}/>
-        </div>
-        <div className="board-row">
-          <Square onSquareClick={() => handleClick(6)} value={squares[6]}/>
-          <Square onSquareClick={() => handleClick(7)} value={squares[7]}/>
-          <Square onSquareClick={() => handleClick(8)} value={squares[8]}/>
-        </div>
+        { buildSquares() }
       </div>
 
       <div className="status-area">
