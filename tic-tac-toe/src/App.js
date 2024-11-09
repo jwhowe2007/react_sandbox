@@ -46,22 +46,24 @@ function Board({isXTurn, squares, gameState, gameWon, onPlay, onReset}) {
 }
 
 export default function Game() {
-  const [isXTurn, setIsXTurn] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [gameState, setGameState] = useState("It's X's turn: ");
   const [gameWon, setGameWon] = useState(false);
   const [currentMove, setCurrentMove] = useState(0);
+
+  const isXTurn = currentMove % 2 == 0;
   let currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-    setHistory(nextHistory);
-    setCurrentMove(nextHistory.length - 1);
 
     if (nextHistory.length == 9) {
       setGameState("Game ends in a draw. Please reset the board to start anew!");
       return;
     }
+
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
 
     let winner = calculateWinner(nextHistory[nextHistory.length - 1]);
 
@@ -69,20 +71,17 @@ export default function Game() {
       setGameState("Winner: Player " + winner + "!!");
       setGameWon(true);
     } else {
-      setIsXTurn(!isXTurn);
       setGameState(!isXTurn ? "It's X's turn: " : "It's O's turn: ");
     }
   }
 
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
-    setIsXTurn(nextMove % 2 === 0);
-    setGameState(nextMove % 2 === 0 ? "It's X's turn: " : "It's O's turn: ");
+    setGameState(nextMove % 2 == 0 ? "It's X's turn: " : "It's O's turn: ");
   }
 
   function resetBoard() {
     setHistory([Array(9).fill(null)]);
-    setIsXTurn(true);
     setCurrentMove(0);
     setGameState("It's X's turn: ");
     setGameWon(false);
