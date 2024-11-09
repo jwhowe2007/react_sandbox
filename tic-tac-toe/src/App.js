@@ -50,20 +50,22 @@ export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [gameState, setGameState] = useState("It's X's turn: ");
   const [gameWon, setGameWon] = useState(false);
-  const currentSquares = history[history.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  let currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
 
-    if (history.length == 9) {
+    if (nextHistory.length == 9) {
       setGameState("Game ends in a draw. Please reset the board to start anew!");
       return;
     }
 
-    let winner = calculateWinner(nextSquares);
+    let winner = calculateWinner(nextHistory[nextHistory.length - 1]);
 
     if (winner != null) {
-      console.log(winner);
       setGameState("Winner: Player " + winner + "!!");
       setGameWon(true);
     } else {
@@ -72,19 +74,42 @@ export default function Game() {
     }
   }
 
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+    setIsXTurn(nextMove % 2 === 0);
+    setGameState(nextMove % 2 === 0 ? "It's X's turn: " : "It's O's turn: ");
+  }
+
   function resetBoard() {
     setHistory([Array(9).fill(null)]);
     setIsXTurn(true);
+    setCurrentMove(0);
     setGameState("It's X's turn: ");
     setGameWon(false);
   }
+
+  const moves = history.map((squares, move) => {
+    if (gameWon) {
+      return;
+    }
+
+    let description = move > 0 ? "Go to move #" + move : "Go to game start";
+
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
 
   return (
     <div className="game">
       <div className="game-board">
         <Board isXTurn={isXTurn} squares={currentSquares} gameState={gameState} gameWon={gameWon} onPlay={handlePlay} onReset={resetBoard} />
       </div>
-      <div className="game-info"></div>
+      <div className="game-info">
+        <ol>{moves}</ol>
+      </div>
     </div>
   );
 }
